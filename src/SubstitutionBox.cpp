@@ -1,80 +1,84 @@
 
-#include<bitset>
-#include<cmath>         //  To implement Exponents.
-#include<algorithm>     //  To implement the swap function.
-#include<climits>
+/*******************************************************************************
+ *                            SubstitutionBox.cpp
+ *  @author     Jeff Gardner
+*******************************************************************************/
+
+#include <bitset>
 
 #include "SubstitutionBox.h"
 
-using namespace std;
+const std::bitset<8> FWD_SBOX_CONST { 0x63 };
+const std::bitset<8> INV_SBOX_CONST { 0x05 };
 
-SubstitutionBox::SubstitutionBox() : 
-    m_inverseValue{ 0 },
-    m_sBoxValue{ 0 },
-    m_multiInverse{ MultiplicativeInverse() }
-{}
-
-unsigned short SubstitutionBox::getSBoxValue()
+unsigned short SubstitutionBox::getForwardSBoxValue( const unsigned short inputValue )
 {
-    return m_sBoxValue;
+    //  Forward Substitution Box result
+    unsigned short forwardSBoxValue = 0;
+
+    //  Only process 256 ( 0 - 255 ) values
+    if(( inputValue >= 0 ) && ( inputValue < 256 )) {
+        
+        MultiplicativeInverse multiInverseObj;
+
+        //  Find the multiplicative inverse of the input value and assign the
+        //  result to an 8 bit bitset object to manipulate each bit
+        multiInverseObj.solveForInverse( inputValue );
+        std::bitset<8> inputByte = multiInverseObj.getInverseValue();
+
+        //  The resulting byte after the affine transformation
+        std::bitset<8> affineTransResult; 
+        
+        //  The Forward Affine transformation Matrix and rotations
+        affineTransResult[0] = inputByte[0] ^ inputByte[4] ^ inputByte[5] ^ inputByte[6] ^ inputByte[7] ^ FWD_SBOX_CONST[0];
+        affineTransResult[1] = inputByte[0] ^ inputByte[1] ^ inputByte[5] ^ inputByte[6] ^ inputByte[7] ^ FWD_SBOX_CONST[1];
+        affineTransResult[2] = inputByte[0] ^ inputByte[1] ^ inputByte[2] ^ inputByte[6] ^ inputByte[7] ^ FWD_SBOX_CONST[2];
+        affineTransResult[3] = inputByte[0] ^ inputByte[1] ^ inputByte[2] ^ inputByte[3] ^ inputByte[7] ^ FWD_SBOX_CONST[3];
+        affineTransResult[4] = inputByte[0] ^ inputByte[1] ^ inputByte[2] ^ inputByte[3] ^ inputByte[4] ^ FWD_SBOX_CONST[4];
+        affineTransResult[5] = inputByte[1] ^ inputByte[2] ^ inputByte[3] ^ inputByte[4] ^ inputByte[5] ^ FWD_SBOX_CONST[5];
+        affineTransResult[6] = inputByte[2] ^ inputByte[3] ^ inputByte[4] ^ inputByte[5] ^ inputByte[6] ^ FWD_SBOX_CONST[6];
+        affineTransResult[7] = inputByte[3] ^ inputByte[4] ^ inputByte[5] ^ inputByte[6] ^ inputByte[7] ^ FWD_SBOX_CONST[7];
+
+        //  Convert the Bitset object into an unsigned short
+        forwardSBoxValue = affineTransResult.to_ulong();
+    }
+
+    return forwardSBoxValue;
 }
 
-void SubstitutionBox::processSBoxInput( const unsigned short inputValue )
+
+unsigned short SubstitutionBox::getInverseSBoxValue( const unsigned short inputValue )
 {
+    //  Inverse Substitution Box result
+    unsigned short inverseSBoxValue = 0;
+
+    //  Only process 256 ( 0 - 255 ) values
     if(( inputValue >= 0 ) && ( inputValue < 256 )) { 
-        m_multiInverse.solveForInverse( inputValue );
-        m_inverseValue = m_multiInverse.getInverseValue();
-        doFowardAffineTransformation();
+
+        MultiplicativeInverse multiInverseObj;
+
+        //  Assign the input value that will XOR and rotated as an 8 bit bitset
+        //  object to manipulate each bit
+        std::bitset<8> inputByte = inputValue ;
+
+        //  Will contain the resulting byte after the affine transformation
+        std::bitset<8> affineTransResult;
+        
+        //  The Inverse Affine transformation Matrix and rotations
+        affineTransResult[0] = inputByte[2] ^ inputByte[5] ^ inputByte[7] ^ INV_SBOX_CONST[0];
+        affineTransResult[1] = inputByte[0] ^ inputByte[3] ^ inputByte[6] ^ INV_SBOX_CONST[1];
+        affineTransResult[2] = inputByte[1] ^ inputByte[4] ^ inputByte[7] ^ INV_SBOX_CONST[2];
+        affineTransResult[3] = inputByte[0] ^ inputByte[2] ^ inputByte[5] ^ INV_SBOX_CONST[3];
+        affineTransResult[4] = inputByte[1] ^ inputByte[3] ^ inputByte[6] ^ INV_SBOX_CONST[4];
+        affineTransResult[5] = inputByte[2] ^ inputByte[4] ^ inputByte[7] ^ INV_SBOX_CONST[5];
+        affineTransResult[6] = inputByte[0] ^ inputByte[3] ^ inputByte[5] ^ INV_SBOX_CONST[6];
+        affineTransResult[7] = inputByte[1] ^ inputByte[4] ^ inputByte[6] ^ INV_SBOX_CONST[7];
+        
+        //  Find the multiplicative inverse of the inverse affine transformation 
+        //  result which will then be the resulting inverse substitution box value
+        multiInverseObj.solveForInverse( affineTransResult.to_ulong() );
+        inverseSBoxValue = multiInverseObj.getInverseValue();
     }
 
-    else {
-        m_sBoxValue = USHRT_MAX;
-    }
+    return inverseSBoxValue;
 }
-
-void SubstitutionBox::doFowardAffineTransformation()
-{
-    //  Inbound multiplicative inverse object
-    bitset<8> inverse = m_inverseValue;
-
-    bitset<8> irreduciablePolynomial = 0x63;
-
-    //  Result Byte
-    bitset<8> sBoxByte; 
-    
-    sBoxByte[0] = inverse[0] ^ inverse[4] ^ inverse[5] ^ inverse[6] ^ inverse[7] ^ irreduciablePolynomial[0];
-    sBoxByte[1] = inverse[0] ^ inverse[1] ^ inverse[5] ^ inverse[6] ^ inverse[7] ^ irreduciablePolynomial[1];
-    sBoxByte[2] = inverse[0] ^ inverse[1] ^ inverse[2] ^ inverse[6] ^ inverse[7] ^ irreduciablePolynomial[2];
-    sBoxByte[3] = inverse[0] ^ inverse[1] ^ inverse[2] ^ inverse[3] ^ inverse[7] ^ irreduciablePolynomial[3];
-    sBoxByte[4] = inverse[0] ^ inverse[1] ^ inverse[2] ^ inverse[3] ^ inverse[4] ^ irreduciablePolynomial[4];
-    sBoxByte[5] = inverse[1] ^ inverse[2] ^ inverse[3] ^ inverse[4] ^ inverse[5] ^ irreduciablePolynomial[5];
-    sBoxByte[6] = inverse[2] ^ inverse[3] ^ inverse[4] ^ inverse[5] ^ inverse[6] ^ irreduciablePolynomial[6];
-    sBoxByte[7] = inverse[3] ^ inverse[4] ^ inverse[5] ^ inverse[6] ^ inverse[7] ^ irreduciablePolynomial[7];
-
-    //  Convert the Bitset object into an unsigned short
-    m_sBoxValue = sBoxByte.to_ulong();
-}
-
-
-
-//	The Affine Transformation.
-void SubstitutionBox::doInverseAffineTransformation()
-{
-    bitset<8> inverse = m_inverseValue;
-    bitset<8> irreduciablePolynomial = 0x05;
-    bitset<8> sBoxByte;
-    
-    sBoxByte[0] = inverse[2] ^ inverse[5] ^ inverse[7] ^ irreduciablePolynomial[0];
-    sBoxByte[1] = inverse[0] ^ inverse[3] ^ inverse[6] ^ irreduciablePolynomial[1];
-    sBoxByte[2] = inverse[1] ^ inverse[4] ^ inverse[7] ^ irreduciablePolynomial[2];
-    sBoxByte[3] = inverse[0] ^ inverse[2] ^ inverse[5] ^ irreduciablePolynomial[3];
-    sBoxByte[4] = inverse[1] ^ inverse[3] ^ inverse[6] ^ irreduciablePolynomial[4];
-    sBoxByte[5] = inverse[2] ^ inverse[4] ^ inverse[7] ^ irreduciablePolynomial[5];
-    sBoxByte[6] = inverse[0] ^ inverse[3] ^ inverse[5] ^ irreduciablePolynomial[6];
-    sBoxByte[7] = inverse[1] ^ inverse[4] ^ inverse[6] ^ irreduciablePolynomial[7];
-    
-    //  Convert the Bitset object into an unsigned short
-    m_sBoxValue = sBoxByte.to_ulong();
-}
-
-

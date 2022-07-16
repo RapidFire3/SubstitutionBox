@@ -34,7 +34,7 @@ int main (int argc, char* argv[])
             cout << columnIdx << "\t";
         cout << endl;
 
-        for( int rowAxis = 0; rowAxis < rowMax; rowAxis++ )
+        for( int rowAxis = 0; rowAxis < rowMax; rowAxis++ ) 
         {
             for( int columnAxis = 0; columnAxis < colmax; columnAxis++ )
             {   
@@ -43,8 +43,8 @@ int main (int argc, char* argv[])
                     std::cout << rowAxis << "\t";
 
                 //  Solve, get and print output.
-                sBox.processSBoxInput( number );
-                cout << setfill('0') << setw(2) << sBox.getSBoxValue() << "\t";
+                cout << setfill('0') << setw(2) << sBox.getForwardSBoxValue( number ) << "\t";
+                //cout << setfill('0') << setw(2) << sBox.getInverseSBoxValue( number ) << "\t";
                 number++;
             }
             cout << endl;
@@ -70,12 +70,9 @@ int main (int argc, char* argv[])
         //  Clear the buffer from any unused data.
         numStream.str();
 
-        //  Solve, get and print output.
-        sBox.processSBoxInput( number );
-
         if( number >= 0 && number < 256 ) {
             cout << "0x" << number << " -> 0x";
-            cout << setfill('0') << setw(2) << sBox.getSBoxValue() << endl;
+            cout << setfill('0') << setw(2) << sBox.getForwardSBoxValue( number ) << endl;
         }
 
     }

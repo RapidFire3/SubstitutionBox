@@ -1,11 +1,11 @@
 /*******************************************************************************
- *                              Substitution Box
- * This class is responsible for finding the multiplicative inverse of the 
- * giving input byte by utilizing the Extended Euclidean Algorithm. This class 
- * only operates on values 0 - 255 resulting in the result being a byte. 
+ *                              SubstitutionBox.h
+ *  This class is responsible for finding the multiplicative inverse of the 
+ *  giving input byte by utilizing the Extended Euclidean Algorithm. This class 
+ *  only operates on values 0 - 255 resulting in the result being a byte. 
  * 
  * @author      Jeff Gardner
-********************************************************************************/
+********************************************************************************/     
 
 #include "MultiplicativeInverse.h"
 
@@ -15,19 +15,39 @@
 class SubstitutionBox
 {
 public:
-    SubstitutionBox();
+
+    //  Default Constructor
+    SubstitutionBox(){}
+
+    //  Destructor
     ~SubstitutionBox(){}
-    void processSBoxInput( const unsigned short inputValue );
-    unsigned short getSBoxValue();
 
-private:
-    void doInverseAffineTransformation();
-    void doFowardAffineTransformation();
-    unsigned short m_inputValue;
-    unsigned short m_inverseValue;
-    unsigned short m_sBoxValue;
-    MultiplicativeInverse m_multiInverse;
+    /*******************************************************************************
+     *                          getForwardSBoxValue()
+     *  This method is responsible for finding the forward substitution box value by
+     *  first, finding the multiplicative inverse of the input value. Then, the
+     *  result will then be passed off to the affine transformation which then 
+     *  produce the S-Box value.
+     * 
+     *  @param  inputValue -> unsigned short that will be used for processing and
+     *          manipulating.
+     * 
+     *  @return forwardSBoxValue
+    *******************************************************************************/
+    unsigned short getForwardSBoxValue( const unsigned short inputValue );
 
+    /*******************************************************************************
+     *                          getInverseSBoxValue()
+     *  This method is responsible for finding the inverse substitution box value of
+     *  an input number by conducting the inverse affine transformation and finding
+     *  the multiplicative inverse of the input value.
+     * 
+     *  @param  inputValue -> unsigned short that will be used for processing and
+     *          manipulating.
+     * 
+     *  @return inverseSBoxValue
+    *******************************************************************************/
+    unsigned short getInverseSBoxValue( const unsigned short inputValue );
 };
 
 #endif

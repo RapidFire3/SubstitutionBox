@@ -8,7 +8,7 @@
 ---
 
 ## **Introduction**
-The Substitution Box program is responsible for returning the Substitution Box or S-Box value of a input number between 0 - 256. This is accomplished by first utilizing the Multiplicative Inverse of the input value using the Extended Euclidean Algorithm. The result will then be passed to the affine transformation which will produce the substitution box value. Locating the S-Box value is the 1 of the 4 steps in encrypting data using the Advanced Encryption Standard (AES) cryptographic algorithm. The actual Substitution Box Table can be located in the [Resources](#resources) section of this file.
+The Substitution Box program is responsible for returning the Substitution Box or S-Box value of a input number between 0 - 256. This is accomplished by first utilizing the Multiplicative Inverse of the input value using the Extended Euclidean Algorithm. The result will then be passed to the affine transformation which will produce the substitution box value. Locating the S-Box value is the 1 of the 4 steps in encrypting data using the Advanced Encryption Standard (AES) cryptographic algorithm. The actual Substitution Box Tables can be located in the [Resources](#resources) section of this file.
 
 ---
 
@@ -49,4 +49,4 @@ If a value is entered out of bounds the following error will be displayed. <br /
 ## **Resources**
 *   [Finite Field](https://en.wikipedia.org/wiki/Finite_field_arithmetic#Rijndael's_(AES)_finite_field)  
 *   [Galois Field in Cryptography](https://sites.math.washington.edu/~morrow/336_12/papers/juan.pdf)
-*   [Substitution Box Table](https://www.researchgate.net/figure/S-box-substitution-values-for-the-byte-xy-in-hexadecimal-format_fig4_220091765)
+*   [Substitution Box Tables](https://en.wikipedia.org/wiki/Rijndael_S-box)
